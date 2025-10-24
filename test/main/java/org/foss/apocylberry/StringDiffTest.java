@@ -1,15 +1,11 @@
 package org.foss.apocylberry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
-
-import com.foss.apocylberry.StringDiff;
-
 
 public class StringDiffTest {
     @Test
