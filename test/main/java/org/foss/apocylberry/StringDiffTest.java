@@ -164,7 +164,6 @@ public class StringDiffTest {
         source.printBinary = true;          testFindAllDifferences(source, compare, "SUBSTITUTE S-00000006: `w: 0b01110111` -> C-00000006: `W: 0b01010111`");
         source.printBinary = false;
 
-        
         // Test mixed print encodings
         source.printDecimal = true;
         source.printHex = true;
@@ -176,6 +175,20 @@ public class StringDiffTest {
         // Test all encodings enabled
         setFullPrint( source );
         testFindAllDifferences(source, compare, "SUBSTITUTE S-00000006: `w: 0d0119 0x0077 0b01110111` -> C-00000006: `W: 0d0087 0x0057 0b01010111`");
+    }
+
+    @Test
+    public void SD_Test_006_00() {
+        StringDiff source = new StringDiff("Hello world");
+        StringDiff compare = new StringDiff("Hello 1World");
+        setFullPrint(source);
+
+        // Test "INSERT" logic
+        testFindAllDifferences(source, compare, "SUBSTITUTE S-00000006: `w: 0d0119 0x0077 0b01110111` -> C-00000006: `1: 0d0049 0x0031 0b00110001`|INSERT                                                  C-00000007: `W: 0d0087 0x0057 0b01010111`");
+
+        // Test "Substitute-only" logic
+        source.maxSubstitutionPeek = 0;
+        testFindAllDifferences(source, compare, "SUBSTITUTE S-00000006: `w: 0d0119 0x0077 0b01110111` -> C-00000006: `1: 0d0049 0x0031 0b00110001`|SUBSTITUTE S-00000007: `o: 0d0111 0x006f 0b01101111` -> C-00000007: `W: 0d0087 0x0057 0b01010111`|SUBSTITUTE S-00000008: `r: 0d0114 0x0072 0b01110010` -> C-00000008: `o: 0d0111 0x006f 0b01101111`|SUBSTITUTE S-00000009: `l: 0d0108 0x006c 0b01101100` -> C-00000009: `r: 0d0114 0x0072 0b01110010`|SUBSTITUTE S-00000010: `d: 0d0100 0x0064 0b01100100` -> C-00000010: `l: 0d0108 0x006c 0b01101100`|INSERT                                                  C-00000011: `d: 0d0100 0x0064 0b01100100`");
     }
 
 

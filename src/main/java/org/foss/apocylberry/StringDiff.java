@@ -26,6 +26,22 @@ public class StringDiff {
     public boolean printDecimal = true;
     public boolean printHex = false;
     public boolean printBinary = false;
+    
+    /**
+     * Maximum number of characters to peek ahead when attempting to distinguish
+     * insertions/deletions from substitutions during diffing.
+     *
+     * The diff algorithm will scan up to this many characters forward in both
+     * the source and compare buffers when a mismatch is found, in order to
+     * determine whether the difference is an insertion, a deletion, or a
+     * substitution. Increasing this value can improve detection of multi-
+     * character insert/delete sequences but increases work per mismatch.
+     *
+     * Set to 0 to disable lookahead (only direct substitutions are detected).
+     *
+     * Default: 10. Must be non-negative.
+     */
+    public int maxSubstitutionPeek = 10;
 
 
     public StringDiff(String forString)                                        {this(forString, false);}
@@ -170,14 +186,12 @@ public class StringDiff {
 
     // String-native comparisons
     public void printAllDifferences(String compare)                        {printAllDifferences(compare, 0, 0);}
-    public void printAllDifferences(String compare, int fromSourceIndex, int fromCompareIndex) {printAllDifferences(compare, fromSourceIndex, fromCompareIndex, 10);}
-    public void printAllDifferences(String compare, int fromSourceIndex, int fromCompareIndex, int maxSubstitutionPeek) {printAllDifferences(new StringDiff(compare), fromSourceIndex, fromCompareIndex, maxSubstitutionPeek);}
+    public void printAllDifferences(String compare, int fromSourceIndex, int fromCompareIndex) {printAllDifferences(new StringDiff(compare), fromSourceIndex, fromCompareIndex);}
 
     // Cross-validator comparisons
     public void printAllDifferences(StringDiff compare)                        {printAllDifferences(compare, 0, 0);}
-    public void printAllDifferences(StringDiff compare, int fromSourceIndex, int fromCompareIndex) {printAllDifferences(compare, fromSourceIndex, fromCompareIndex, 10);}
-    public void printAllDifferences(StringDiff compare, int fromSourceIndex, int fromCompareIndex, int maxSubstitutionPeek) {
-        String[] Response = findAllDifferences(compare, fromSourceIndex, fromCompareIndex, maxSubstitutionPeek);
+    public void printAllDifferences(StringDiff compare, int fromSourceIndex, int fromCompareIndex) {
+        String[] Response = findAllDifferences(compare, fromSourceIndex, fromCompareIndex);
         if (Response.length == 0) {
             System.out.println("NO DIFFERENCES");
         }
@@ -191,13 +205,11 @@ public class StringDiff {
 
     // String-native comparisons
     public String[] findAllDifferences(String compare)                              {return findAllDifferences(compare, 0, 0);}
-    public String[] findAllDifferences(String compare, int fromSourceIndex, int fromCompareIndex) {return findAllDifferences(compare, fromSourceIndex, fromCompareIndex, 10);}
-    public String[] findAllDifferences(String compare, int fromSourceIndex, int fromCompareIndex, int maxSubstitutionPeek) {return findAllDifferences(new StringDiff(compare), fromSourceIndex, fromCompareIndex, maxSubstitutionPeek);}
+    public String[] findAllDifferences(String compare, int fromSourceIndex, int fromCompareIndex) {return findAllDifferences(new StringDiff(compare), fromSourceIndex, fromCompareIndex);}
 
     // Cross-validator comparisons
     public String[] findAllDifferences(StringDiff compare)                     {return findAllDifferences(compare, 0, 0);}
-    public String[] findAllDifferences(StringDiff compare, int fromSourceIndex, int fromCompareIndex) {return findAllDifferences(compare, fromSourceIndex, fromCompareIndex, 10);}
-    public String[] findAllDifferences(StringDiff compare, int fromSourceIndex, int fromCompareIndex, int maxSubstitutionPeek) {
+    public String[] findAllDifferences(StringDiff compare, int fromSourceIndex, int fromCompareIndex) {
         ArrayList<String> Response = new ArrayList<>();
         startTime = System.nanoTime();
         endTime = startTime;
