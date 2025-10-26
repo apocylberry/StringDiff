@@ -21,6 +21,7 @@ public class StringDiffTest {
     @Test
     public void SD_Test_001_00() {
         StringDiff source = new StringDiff("Hello");
+        setFullPrint( source );
 
         assertEquals(source.toString(0), "H: 0d0072 0x0048 0b01001000");
         assertEquals(source.toString(0, true), "       0: `H: 0d0072 0x0048 0b01001000`");
@@ -32,7 +33,8 @@ public class StringDiffTest {
     public void SD_Test_002_00() {
         StringDiff source = new StringDiff("Hello");
         StringDiff compare = new StringDiff("Hello world");
-        
+        setFullPrint( compare );
+
         assertEquals(source.findFirstDifferenceIndex(compare), -1);
         assertEquals(compare.findFirstDifferenceIndex(source), 5);
         assertEquals(compare.toString(compare.findFirstDifferenceIndex(source)), " : 0d0032 0x0020 0b00100000");
@@ -41,6 +43,8 @@ public class StringDiffTest {
     @Test
     public void SD_Test_003_00() {
         StringDiff source = new StringDiff("Hello world");
+        setFullPrint( source );
+
         ArrayList<StringDiff> compares = new ArrayList<>();
         compares.add(source);
         compares.add(new StringDiff("Hello world"));
@@ -126,15 +130,63 @@ public class StringDiffTest {
         // Isolated - unmodified to seek string
         compares.add(new StringDiff("\"connectionTimeMS\":574,\"executionTimeMS\":85,\"retryCount\":0,\"executeContinue\":false"));
         compares.add(new StringDiff("\"connectionTimeMS\":#ANY-COMMA,\"executionTimeMS\":#ANY-COMMA,\"retryCount\":0,\"executeContinue\":false"));
+        setFullPrint(compares.get(0)); setFullPrint(compares.get(1));
+        
         testFindAllDifferences(compares.get(++index), compares.get(++index), "SUBSTITUTE S-00000019: `5: 0d0053 0x0035 0b00110101` -> C-00000019: `#: 0d0035 0x0023 0b00100011`|SUBSTITUTE S-00000020: `7: 0d0055 0x0037 0b00110111` -> C-00000020: `A: 0d0065 0x0041 0b01000001`|SUBSTITUTE S-00000021: `4: 0d0052 0x0034 0b00110100` -> C-00000021: `N: 0d0078 0x004e 0b01001110`|INSERT                                                  C-00000022: `Y: 0d0089 0x0059 0b01011001`|INSERT                                                  C-00000023: `-: 0d0045 0x002d 0b00101101`|INSERT                                                  C-00000024: `C: 0d0067 0x0043 0b01000011`|INSERT                                                  C-00000025: `O: 0d0079 0x004f 0b01001111`|INSERT                                                  C-00000026: `M: 0d0077 0x004d 0b01001101`|INSERT                                                  C-00000027: `M: 0d0077 0x004d 0b01001101`|INSERT                                                  C-00000028: `A: 0d0065 0x0041 0b01000001`|SUBSTITUTE S-00000041: `8: 0d0056 0x0038 0b00111000` -> C-00000048: `#: 0d0035 0x0023 0b00100011`|SUBSTITUTE S-00000042: `5: 0d0053 0x0035 0b00110101` -> C-00000049: `A: 0d0065 0x0041 0b01000001`|INSERT                                                  C-00000050: `N: 0d0078 0x004e 0b01001110`|INSERT                                                  C-00000051: `Y: 0d0089 0x0059 0b01011001`|INSERT                                                  C-00000052: `-: 0d0045 0x002d 0b00101101`|INSERT                                                  C-00000053: `C: 0d0067 0x0043 0b01000011`|INSERT                                                  C-00000054: `O: 0d0079 0x004f 0b01001111`|INSERT                                                  C-00000055: `M: 0d0077 0x004d 0b01001101`|INSERT                                                  C-00000056: `M: 0d0077 0x004d 0b01001101`|INSERT                                                  C-00000057: `A: 0d0065 0x0041 0b01000001`");
         
         // Full - unmodified to seek string
         compares.add(new StringDiff("{\"service_msg\":\"[jcc][t4][102][10040][4.28.11] Batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch.|Use getNextException() to retrieve the exceptions for specific batched elements. ERRORCODE=-4229, SQLSTATE=null\",\"service_status_code\":-1,\"sql_status\":{\"executionInfo\":[{\"name\":\"UPSERT_CLUB_ITEM_INVT\",\"sqlStmt\":\"INSERT INTO TABLE.LANGUAGE (LANGUAGE_CODE, BASE_LANGUAGE_CODE, COUNTRY_CODE)\nVALUES (\n  ?,\n  ?,\n  ?\n)\",\"sqlCode\":-4229,\"sqlState\":\"\",\"sqlMsg\":\"[jcc][t4][102][10040][4.28.11] Batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch.|Use getNextException() to retrieve the exceptions for specific batched elements. ERRORCODE=-4229, SQLSTATE=null ('A NON-ATOMIC INSERT STATEMENT ATTEMPTED TO PROCESS MULTIPLE ROWS OF DATA, BUT ERRORS OCCURRED' ERRORCODE=-254, SQLSTATE=22530|'Error for batch element #1: THE VALUE OF INPUT VARIABLE OR PARAMETER NUMBER 2 IS INVALID OR TOO LARGE FOR THE TARGET COLUMN OR THE TARGET VALUE' ERRORCODE=-302, SQLSTATE=22001)\",\"connectionTimeMS\":574,\"executionTimeMS\":85,\"retryCount\":0,\"executeContinue\":false,\"batchErrorRow\":0,\"variables\":{\"request.code\":\"US\",\"request.baseCode\":\"USEN\",\"request.cc\":\"US\"}}],\"UPSERT_CLUB_ITEM_INVT\":{\"excpCode\":-4229,\"batchErrorRow\":0,\"excpMsg\":\"[jcc][t4][102][10040][4.28.11] Batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch.|Use getNextException() to retrieve the exceptions for specific batched elements. ERRORCODE=-4229, SQLSTATE=null ('A NON-ATOMIC INSERT STATEMENT ATTEMPTED TO PROCESS MULTIPLE ROWS OF DATA, BUT ERRORS OCCURRED' ERRORCODE=-254, SQLSTATE=22530|'Error for batch element #1: THE VALUE OF INPUT VARIABLE OR PARAMETER NUMBER 2 IS INVALID OR TOO LARGE FOR THE TARGET COLUMN OR THE TARGET VALUE' ERRORCODE=-302, SQLSTATE=22001)\",\"innerException\":{\"excpCode\": -254, \"excpMsg\": \"A NON-ATOMIC INSERT STATEMENT ATTEMPTED TO PROCESS MULTIPLE ROWS OF DATA, BUT ERRORS OCCURRED\", \"excpState\": \"22530\", \"innerException\": {\"excpCode\": -302, \"excpMsg\": \"Error for batch element #1: THE VALUE OF INPUT VARIABLE OR PARAMETER NUMBER 2 IS INVALID OR TOO LARGE FOR THE TARGET COLUMN OR THE TARGET VALUE\", \"excpState\": \"22001\", \"innerException\": null}},\"execution_count\":1,\"rows\":0,\"excpState\":\"\"}}}"));
         compares.add(new StringDiff("{\"service_msg\":\"[jcc][t4][102][10040][4.28.11] Batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch.|Use getNextException() to retrieve the exceptions for specific batched elements. ERRORCODE=-4229, SQLSTATE=null\",\"service_status_code\":-1,\"sql_status\":{\"executionInfo\":[{\"name\":\"UPSERT_CLUB_ITEM_INVT\",\"sqlStmt\":\"INSERT INTO TABLE.LANGUAGE (LANGUAGE_CODE, BASE_LANGUAGE_CODE, COUNTRY_CODE)\nVALUES (\n  ?,\n  ?,\n  ?\n)\",\"sqlCode\":-4229,\"sqlState\":\"\",\"sqlMsg\":\"[jcc][t4][102][10040][4.28.11] Batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch.|Use getNextException() to retrieve the exceptions for specific batched elements. ERRORCODE=-4229, SQLSTATE=null ('A NON-ATOMIC INSERT STATEMENT ATTEMPTED TO PROCESS MULTIPLE ROWS OF DATA, BUT ERRORS OCCURRED' ERRORCODE=-254, SQLSTATE=22530|'Error for batch element #1: THE VALUE OF INPUT VARIABLE OR PARAMETER NUMBER 2 IS INVALID OR TOO LARGE FOR THE TARGET COLUMN OR THE TARGET VALUE' ERRORCODE=-302, SQLSTATE=22001)\",\"connectionTimeMS\":#ANY-COMMA,\"executionTimeMS\":#ANY-COMMA,\"retryCount\":0,\"executeContinue\":false,\"batchErrorRow\":0,\"variables\":{\"request.code\":\"US\",\"request.baseCode\":\"USEN\",\"request.cc\":\"US\"}}],\"UPSERT_CLUB_ITEM_INVT\":{\"excpCode\":-4229,\"batchErrorRow\":0,\"excpMsg\":\"[jcc][t4][102][10040][4.28.11] Batch failure.  The batch was submitted, but at least one exception occurred on an individual member of the batch.|Use getNextException() to retrieve the exceptions for specific batched elements. ERRORCODE=-4229, SQLSTATE=null ('A NON-ATOMIC INSERT STATEMENT ATTEMPTED TO PROCESS MULTIPLE ROWS OF DATA, BUT ERRORS OCCURRED' ERRORCODE=-254, SQLSTATE=22530|'Error for batch element #1: THE VALUE OF INPUT VARIABLE OR PARAMETER NUMBER 2 IS INVALID OR TOO LARGE FOR THE TARGET COLUMN OR THE TARGET VALUE' ERRORCODE=-302, SQLSTATE=22001)\",\"innerException\":{\"excpCode\": -254, \"excpMsg\": \"A NON-ATOMIC INSERT STATEMENT ATTEMPTED TO PROCESS MULTIPLE ROWS OF DATA, BUT ERRORS OCCURRED\", \"excpState\": \"22530\", \"innerException\": {\"excpCode\": -302, \"excpMsg\": \"Error for batch element #1: THE VALUE OF INPUT VARIABLE OR PARAMETER NUMBER 2 IS INVALID OR TOO LARGE FOR THE TARGET COLUMN OR THE TARGET VALUE\", \"excpState\": \"22001\", \"innerException\": null}},\"execution_count\":1,\"rows\":0,\"excpState\":\"\"}}}"));
+        setFullPrint(compares.get(2)); setFullPrint(compares.get(3));
+        
         testFindAllDifferences(compares.get(++index), compares.get(++index), "SUBSTITUTE S-00001101: `5: 0d0053 0x0035 0b00110101` -> C-00001101: `#: 0d0035 0x0023 0b00100011`|SUBSTITUTE S-00001102: `7: 0d0055 0x0037 0b00110111` -> C-00001102: `A: 0d0065 0x0041 0b01000001`|SUBSTITUTE S-00001103: `4: 0d0052 0x0034 0b00110100` -> C-00001103: `N: 0d0078 0x004e 0b01001110`|INSERT                                                  C-00001104: `Y: 0d0089 0x0059 0b01011001`|INSERT                                                  C-00001105: `-: 0d0045 0x002d 0b00101101`|INSERT                                                  C-00001106: `C: 0d0067 0x0043 0b01000011`|INSERT                                                  C-00001107: `O: 0d0079 0x004f 0b01001111`|INSERT                                                  C-00001108: `M: 0d0077 0x004d 0b01001101`|INSERT                                                  C-00001109: `M: 0d0077 0x004d 0b01001101`|INSERT                                                  C-00001110: `A: 0d0065 0x0041 0b01000001`|SUBSTITUTE S-00001123: `8: 0d0056 0x0038 0b00111000` -> C-00001130: `#: 0d0035 0x0023 0b00100011`|SUBSTITUTE S-00001124: `5: 0d0053 0x0035 0b00110101` -> C-00001131: `A: 0d0065 0x0041 0b01000001`|INSERT                                                  C-00001132: `N: 0d0078 0x004e 0b01001110`|INSERT                                                  C-00001133: `Y: 0d0089 0x0059 0b01011001`|INSERT                                                  C-00001134: `-: 0d0045 0x002d 0b00101101`|INSERT                                                  C-00001135: `C: 0d0067 0x0043 0b01000011`|INSERT                                                  C-00001136: `O: 0d0079 0x004f 0b01001111`|INSERT                                                  C-00001137: `M: 0d0077 0x004d 0b01001101`|INSERT                                                  C-00001138: `M: 0d0077 0x004d 0b01001101`|INSERT                                                  C-00001139: `A: 0d0065 0x0041 0b01000001`");
     }
 
+    @Test
+    public void SD_Test_005_00() {
+        StringDiff source = new StringDiff("Hello world");
+        StringDiff compare = new StringDiff("Hello World");
+        source.printDecimal = false;
+        source.printHex = false;
+        source.printBinary = false;
+
+
+        // Test all print encoding disabled
+        testFindAllDifferences(source, compare, "SUBSTITUTE S-00000006: `w` -> C-00000006: `W`");
+
+        // Test individual print encodings
+        source.printDecimal = true;         testFindAllDifferences(source, compare, "SUBSTITUTE S-00000006: `w: 0d0119` -> C-00000006: `W: 0d0087`");
+        source.printDecimal = false;
+
+        source.printHex = true;             testFindAllDifferences(source, compare, "SUBSTITUTE S-00000006: `w: 0x0077` -> C-00000006: `W: 0x0057`");
+        source.printHex = false;
+
+        source.printBinary = true;          testFindAllDifferences(source, compare, "SUBSTITUTE S-00000006: `w: 0b01110111` -> C-00000006: `W: 0b01010111`");
+        source.printBinary = false;
+
+        
+        // Test mixed print encodings
+        source.printDecimal = true;
+        source.printHex = true;
+        testFindAllDifferences(source, compare, "SUBSTITUTE S-00000006: `w: 0d0119 0x0077` -> C-00000006: `W: 0d0087 0x0057`");
+        source.printDecimal = false;
+        source.printHex = false;
+
+
+        // Test all encodings enabled
+        setFullPrint( source );
+        testFindAllDifferences(source, compare, "SUBSTITUTE S-00000006: `w: 0d0119 0x0077 0b01110111` -> C-00000006: `W: 0d0087 0x0057 0b01010111`");
+    }
+
+
     private void testFindAllDifferences(StringDiff source, StringDiff compare, String assertOutput) {
         assertEquals(assertOutput, String.join("|", source.findAllDifferences(compare)));
+    }
+    private void setFullPrint( StringDiff sd ) {
+        // These were not originally optional.  To pass the original battery of tests, 
+        // these all need to be activated.  New tests should not call this method.
+        sd.printDecimal = true;
+        sd.printHex = true;
+        sd.printBinary = true;
     }
 }

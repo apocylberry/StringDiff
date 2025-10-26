@@ -23,7 +23,10 @@ public class StringDiff {
     }
 
     public TimeUnits defaultTimeUnit = TimeUnits.milliseconds;
-    
+    public boolean printDecimal = true;
+    public boolean printHex = false;
+    public boolean printBinary = false;
+
 
     public StringDiff(String forString)                                        {this(forString, false);}
     public StringDiff(String forString, boolean printOutput) {
@@ -63,7 +66,16 @@ public class StringDiff {
             if (iPOS >= contents.length) break;
 
             if (printIndexNumber) Response.append(String.format("%8d: `", iPOS));
-                                  Response.append(String.format("%s: 0d%04d 0x%04x 0b%08d", printableCharacter(contents[iPOS]), (int)contents[iPOS], (int)contents[iPOS], Integer.parseInt(Integer.toBinaryString(contents[iPOS]))));
+                                  Response.append(printableCharacter(contents[iPOS]));
+
+                                  // Print the encoding values
+                                  if ( printDecimal || printHex || printBinary ) {
+                                                      Response.append(":");
+                                  }
+
+                                  if ( printDecimal ) Response.append( String.format(" 0d%04d", (int)contents[iPOS] ));
+                                  if ( printHex )     Response.append( String.format(" 0x%04x", (int)contents[iPOS] ));
+                                  if ( printBinary )  Response.append(" 0b").append(String.format("%8s", Integer.toBinaryString(contents[iPOS])).replace(' ', '0'));
             if (printIndexNumber) Response.append("`");
                                   Response.append("\n");
         }
@@ -118,8 +130,8 @@ public class StringDiff {
     public int findFirstDifferenceIndex(String compare, int fromSourceIndex, int fromCompareIndex) {return findFirstDifferenceIndex(new StringDiff(compare), fromSourceIndex, fromCompareIndex);}
     
     // Cross-validator comparisons
-    public int findFirstDifferenceIndex(StringDiff compare)                    {return findFirstDifferenceIndex(compare, 0, 0);}
-    public int findFirstDifferenceIndex(StringDiff compare, int fromIndex)     {return findFirstDifferenceIndex(compare, fromIndex, fromIndex);}
+    public int findFirstDifferenceIndex(StringDiff compare)                         {return findFirstDifferenceIndex(compare, 0, 0);}
+    public int findFirstDifferenceIndex(StringDiff compare, int fromIndex)          {return findFirstDifferenceIndex(compare, fromIndex, fromIndex);}
     public int findFirstDifferenceIndex(StringDiff compare, int fromSourceIndex, int fromCompareIndex) {
         int Response = -1;
 
@@ -190,83 +202,101 @@ public class StringDiff {
         startTime = System.nanoTime();
         endTime = startTime;
 
+        boolean originalDecimal = compare.printDecimal;
+        boolean originalHex = compare.printHex;
+        boolean originalBinary = compare.printBinary;
+        try {
+            // Make compare output match source output
+            compare.printDecimal = this.printDecimal;
+            compare.printHex = this.printHex;
+            compare.printBinary = this.printBinary;
 
-        if (this == compare) {
-            Response.add(SAME_INSTANCE_TEXT);
-            System.out.println(Response.get(0));
-        }
-        if (contents.length == 0 && compare.contents.length > 0) {
-            Response.add(EMPTY_INPUT_SOURCE);
-            System.out.println(Response.get(0));
-        }
-        if (contents.length > 0 && compare.contents.length == 0) {
-            Response.add(EMPTY_INPUT_COMPARE);
-            System.out.println(Response.get(0));
-        }
-        else {
-            int iPOS = fromSourceIndex;
-            int jPOS = fromCompareIndex;
-            while (iPOS < contents.length && jPOS < compare.contents.length) {
-                if (contents[iPOS] == compare.contents[jPOS]) {
-                    iPOS++;
-                    jPOS++;
-                } else {
-                    // Look ahead for insert or delete
-                    int iPEEK = iPOS + 1;
-                    int jPEEK = jPOS + 1;
-                    boolean foundInsert = false;
-                    boolean foundDelete = false;
-
-                    // Check for insert in compare
-                    while (jPEEK < compare.contents.length && jPEEK - jPOS <= maxSubstitutionPeek) {
-                        if (contents[iPOS] == compare.contents[jPEEK]) {
-                            foundInsert = true;
-                            break;
-                        }
-                        jPEEK++;
-                    }
-
-                    // Check for delete in source
-                    while (iPEEK < contents.length && iPEEK - iPOS <= maxSubstitutionPeek) {
-                        if (contents[iPEEK] == compare.contents[jPOS]) {
-                            foundDelete = true;
-                            break;
-                        }
-                        iPEEK++;
-                    }
-
-                    if (foundInsert && (!foundDelete || jPEEK - jPOS <= iPEEK - iPOS)) {
-                        // Insert detected in compare
-                        for (int k = jPOS; k < jPEEK; k++) {
-                            Response.add(String.format("INSERT                                                  C-%08d: `%s`", k, compare.toString(k)));
-                        }
-                        jPOS = jPEEK;
-                    } else if (foundDelete) {
-                        // Delete detected in source
-                        for (int k = iPOS; k < iPEEK; k++) {
-                            Response.add(String.format("DELETE     S-%08d: `%s`", k, toString(k)));
-                        }
-                        iPOS = iPEEK;
-                    } else {
-                        // Substitution
-                        Response.add(String.format("SUBSTITUTE S-%08d: `%s` -> C-%08d: `%s`", iPOS, toString(iPOS), jPOS, compare.toString(jPOS)));
+            if (this == compare) {
+                Response.add(SAME_INSTANCE_TEXT);
+                System.out.println(Response.get(0));
+            }
+            if (contents.length == 0 && compare.contents.length > 0) {
+                Response.add(EMPTY_INPUT_SOURCE);
+                System.out.println(Response.get(0));
+            }
+            if (contents.length > 0 && compare.contents.length == 0) {
+                Response.add(EMPTY_INPUT_COMPARE);
+                System.out.println(Response.get(0));
+            }
+            else {
+                int iPOS = fromSourceIndex;
+                int jPOS = fromCompareIndex;
+                while (iPOS < contents.length && jPOS < compare.contents.length) {
+                    if (contents[iPOS] == compare.contents[jPOS]) {
                         iPOS++;
                         jPOS++;
+                    } else {
+                        // Look ahead for insert or delete
+                        int iPEEK = iPOS + 1;
+                        int jPEEK = jPOS + 1;
+                        boolean foundInsert = false;
+                        boolean foundDelete = false;
+
+                        // Check for insert in compare
+                        while (jPEEK < compare.contents.length && jPEEK - jPOS <= maxSubstitutionPeek) {
+                            if (contents[iPOS] == compare.contents[jPEEK]) {
+                                foundInsert = true;
+                                break;
+                            }
+                            jPEEK++;
+                        }
+
+                        // Check for delete in source
+                        while (iPEEK < contents.length && iPEEK - iPOS <= maxSubstitutionPeek) {
+                            if (contents[iPEEK] == compare.contents[jPOS]) {
+                                foundDelete = true;
+                                break;
+                            }
+                            iPEEK++;
+                        }
+
+                        if (foundInsert && (!foundDelete || jPEEK - jPOS <= iPEEK - iPOS)) {
+                            // Insert detected in compare
+                            for (int k = jPOS; k < jPEEK; k++) {
+                                Response.add(String.format("INSERT                                                  C-%08d: `%s`", k, compare.toString(k)));
+                            }
+                            jPOS = jPEEK;
+                        } else if (foundDelete) {
+                            // Delete detected in source
+                            for (int k = iPOS; k < iPEEK; k++) {
+                                Response.add(String.format("DELETE     S-%08d: `%s`", k, toString(k)));
+                            }
+                            iPOS = iPEEK;
+                        } else {
+                            // Substitution
+                            Response.add(String.format("SUBSTITUTE S-%08d: `%s` -> C-%08d: `%s`", iPOS, toString(iPOS), jPOS, compare.toString(jPOS)));
+                            iPOS++;
+                            jPOS++;
+                        }
                     }
                 }
-            }
 
-            // Handle remaining deletions
-            while (iPOS < contents.length) {
-                Response.add(String.format("DELETE     S-%08d: `%s`", iPOS, toString(iPOS)));
-                iPOS++;
-            }
+                // Handle remaining deletions
+                while (iPOS < contents.length) {
+                    Response.add(String.format("DELETE     S-%08d: `%s`", iPOS, toString(iPOS)));
+                    iPOS++;
+                }
 
-            // Handle remaining insertions
-            while (jPOS < compare.contents.length) {
-                Response.add(String.format("INSERT                                                  C-%08d: `%s`", jPOS, compare.toString(jPOS)));
-                jPOS++;
+                // Handle remaining insertions
+                while (jPOS < compare.contents.length) {
+                    Response.add(String.format("INSERT                                                  C-%08d: `%s`", jPOS, compare.toString(jPOS)));
+                    jPOS++;
+                }
             }
+        }
+        catch (Exception ex) {
+            throw ex;
+        }
+        finally {
+            // Return compare output to original state
+            compare.printDecimal = originalDecimal;
+            compare.printHex = originalHex;
+            compare.printBinary = originalBinary;
         }
         
         endTime = System.nanoTime();
